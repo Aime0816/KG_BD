@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Happy Birthday, Grace 🌸</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --rose: #e8a0b0;
+    --blush: #f7d6e0;
+    --deep: #8b3a52;
+    --cream: #fdf6f0;
+    --gold: #c9a96e;
+    --text-main: #3d1f2b;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-main);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, blockquote {
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  /* ── Animated gradient bg ── */
+  .bg-animated {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(135deg, #fde8f0 0%, #fdf6f0 40%, #f5e0ea 70%, #ffe8d6 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ── Floating hearts canvas ── */
+  #hearts-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ── Content layer ── */
+  .content {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ── Cursor glow ── */
+  .cursor-glow {
+    position: fixed;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,160,176,0.18) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 5;
+    transform: translate(-50%, -50%);
+    transition: left 0.12s ease, top 0.12s ease;
+  }
+
+  /* ── Entrance animations ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s cubic-bezier(.22,1,.36,1), transform 0.9s cubic-bezier(.22,1,.36,1);
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  .fade-in {
+    opacity: 0;
+    transition: opacity 1.1s ease;
+  }
+  .fade-in.visible { opacity: 1; }
+
+  /* ── Typing cursor ── */
+  .typing-cursor::after {
+    content: '|';
+    animation: blink 0.8s step-end infinite;
+    color: var(--rose);
+    font-weight: 300;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  /* ── Gold divider ── */
+  .gold-line {
+    width: 48px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto;
+  }
+
+  /* ── Surprise button ── */
+  .surprise-btn {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #c9697e 0%, #8b3a52 100%);
+    color: white;
+    border: none;
+    padding: 16px 48px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(139,58,82,0.28), 0 2px 8px rgba(139,58,82,0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .surprise-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 14px 40px rgba(139,58,82,0.35);
+  }
+  .surprise-btn:active { transform: scale(0.97); }
+  .surprise-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -60%;
+    width: 40%; height: 200%;
+    background: rgba(255,255,255,0.18);
+    transform: skewX(-20deg);
+    transition: left 0.5s ease;
+  }
+  .surprise-btn:hover::before { left: 130%; }
+
+  /* ── Hidden romantic message ── */
+  #romantic-msg {
+    display: none;
+    animation: softReveal 1.2s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  #romantic-msg.show { display: block; }
+
+  @keyframes softReveal {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── Photo card ── */
+  .photo-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(139,58,82,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    transition: transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s ease;
+  }
+  .photo-card:hover {
+    transform: translateY(-6px) rotate(0.5deg);
+    box-shadow: 0 16px 48px rgba(139,58,82,0.18);
+  }
+  .photo-placeholder {
+    background: linear-gradient(135deg, #f7d6e0, #ffe8d6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 220px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: #a06070;
+    text-transform: uppercase;
+  }
+
+  /* ── Music button ── */
+  .music-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(232,160,176,0.4);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--deep);
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 12px rgba(139,58,82,0.1);
+  }
+  .music-btn:hover {
+    background: white;
+    box-shadow: 0 4px 20px rgba(139,58,82,0.18);
+    transform: translateY(-1px);
+  }
+  .music-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e8a0b0, #8b3a52);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .music-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+  }
+  .music-bars span {
+    display: block;
+    width: 3px;
+    background: white;
+    border-radius: 2px;
+    animation: barDance 0.8s ease-in-out infinite alternate;
+  }
+  .music-bars span:nth-child(1) { height: 6px;  animation-delay: 0s; }
+  .music-bars span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+  .music-bars span:nth-child(3) { height: 8px;  animation-delay: 0.3s; }
+  .music-bars.paused span { animation-play-state: paused; height: 6px; }
+  @keyframes barDance {
+    from { transform: scaleY(0.4); }
+    to   { transform: scaleY(1); }
+  }
+
+  /* ── Quote block ── */
+  .quote-block {
+    border-left: 2px solid var(--rose);
+    padding-left: 20px;
+    font-style: italic;
+    color: #7a3a4a;
+  }
+
+  /* ── Petal decorations ── */
+  .petal {
+    position: absolute;
+    font-size: 18px;
+    opacity: 0.22;
+    pointer-events: none;
+    animation: float 6s ease-in-out infinite alternate;
+  }
+  @keyframes float {
+    from { transform: translateY(0) rotate(0deg); }
+    to   { transform: translateY(-18px) rotate(12deg); }
+  }
+
+  /* ── Scroll indicator ── */
+  .scroll-hint {
+    animation: bounce 2s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(8px); }
+  }
+
+  /* ── Easter egg ── */
+  #easter-egg {
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-family: 'DM Sans', monospace;
+    color: rgba(139,58,82,0.25);
+    letter-spacing: 0.08em;
+    cursor: default;
+    z-index: 100;
+    transition: color 0.3s;
+  }
+  #easter-egg:hover { color: rgba(139,58,82,0.7); }
+
+  /* ── Responsive fine-tuning ── */
+  @media (max-width: 390px) {
+    .hero-name { font-size: 3.8rem !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background gradient -->
+<div class="bg-animated"></div>
+
+<!-- Floating hearts canvas -->
+<canvas id="hearts-canvas"></canvas>
+
+<!-- Cursor glow (desktop) -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ══════════ FIXED TOP BAR ══════════ -->
+<div class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-5 py-3">
+  <div style="font-family:'Cormorant Garamond',serif; font-size:13px; letter-spacing:0.14em; color:var(--deep); opacity:0.7;">
+    APRIL 26th
+  </div>
+  <button class="music-btn" id="musicBtn" onclick="toggleMusic()">
+    <div class="music-icon">
+      <div class="music-bars paused" id="musicBars">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <span id="musicLabel">U DESERVE THIS</span>
+  </button>
+</div>
+
+<!-- Hidden audio -->
+<audio id="bgMusic" loop>
+  <!-- Public domain / royalty-free piano -->
+  <source src="./song/videoplayback.weba" type="audio/mpeg" />
+</audio>
+
+<!-- ══════════ HERO SECTION ══════════ -->
+<section class="content min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-16 text-center relative">
+
+  <!-- Decorative petals -->
+  <span class="petal" style="top:12%; left:8%; animation-delay:0s;">🌸</span>
+  <span class="petal" style="top:18%; right:10%; animation-delay:1.5s;">🌹</span>
+  <span class="petal" style="bottom:22%; left:6%; animation-delay:0.8s;">✿</span>
+  <span class="petal" style="bottom:28%; right:7%; animation-delay:2s;">🌸</span>
+
+  <!-- Label -->
+  <div class="fade-up" style="transition-delay:0.1s">
+    <p style="font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:0.3em; color:var(--deep); opacity:0.65; text-transform:uppercase; margin-bottom:28px;">
+      A message for you
+    </p>
+  </div>
+
+  <!-- Name -->
+  <div class="fade-up" style="transition-delay:0.25s">
+    <h1 class="hero-name" style="font-family:'Cormorant Garamond',serif; font-size:5.2rem; font-weight:300; line-height:1; color:var(--deep); letter-spacing:-0.01em; margin-bottom:4px;">
+      Grace
+    </h1>
+    <div class="gold-line" style="margin-top:16px; margin-bottom:28px;"></div>
+  </div>
+
+  <!-- Typing message -->
+  <div class="fade-up" style="transition-delay:0.45s; max-width:360px;">
+    <p id="typingText" class="typing-cursor" style="font-family:'Cormorant Garamond',serif; font-size:1.35rem; font-weight:300; line-height:1.7; color:#6b3040; font-style:italic;"></p>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="fade-in scroll-hint mt-14" style="transition-delay:2.5s;" id="scrollHint">
+    <p style="font-size:11px; letter-spacing:0.18em; color:var(--rose); text-transform:uppercase; opacity:0.8;">Scroll</p>
+    <div style="width:1px; height:32px; background:linear-gradient(to bottom, var(--rose), transparent); margin:8px auto 0;"></div>
+  </div>
+</section>
+
+<!-- ══════════ APPRECIATION SECTION ══════════ -->
+<section class="content px-6 py-16 max-w-md mx-auto text-center">
+
+  <div class="fade-up">
+    <p style="font-size:11px; letter-spacing:0.28em; color:var(--gold); text-transform:uppercase; margin-bottom:18px;">Who you are</p>
+    <h2 style="font-family:'Cormorant Garamond',serif; font-size:2.1rem; font-weight:400; color:var(--deep); line-height:1.3; margin-bottom:20px;">
+      You make ordinary moments feel quietly extraordinary.
+    </h2>
+    <div class="gold-line" style="margin-bottom:24px;"></div>
+    <p style="font-size:15px; line-height:1.85; color:#5a3040; font-weight:300;">
+      There's a warmth to the way you exist in the world. The way you listen — really listen. 
+      The way you care without making a show of it. You're someone people feel lucky to know, 
+      and I'm one of those people.
+    </p>
+  </div>
+
+</section>
+
+<!-- ══════════ PHOTO SECTION ══════════ -->
+<section class="content px-5 py-10 max-w-md mx-auto">
+
+  <div class="fade-up">
+    <p style="font-size:11px; letter-spacing:0.28em; color:var(--gold); text-transform:uppercase; text-align:center; margin-bottom:20px;">Moments</p>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3 fade-up" style="transition-delay:0.15s">
+    <div class="photo-card">
+      <div class="photo-placeholder" style="height:190px; font-size:12px;">
+        <div style="text-align:center; line-height:2;">
+          <div style="font-size:24px; margin-bottom:6px;">📸</div>
+          Your photo here
+        </div>
+      </div>
+      <div style="padding:12px 14px; background:white;">
+        <p style="font-family:'Cormorant Garamond',serif; font-size:13px; color:#8b5a66; font-style:italic;">A beautiful day</p>
+      </div>
+    </div>
+
+    <div class="photo-card" style="margin-top:24px;">
+      <div class="photo-placeholder" style="height:190px; background:linear-gradient(135deg,#ffe0ec,#ffd6c8);">
+        <div style="text-align:center; line-height:2;">
+          <div style="font-size:24px; margin-bottom:6px;">🌸</div>
+          Your photo here
+        </div>
+      </div>
+      <div style="padding:12px 14px; background:white;">
+        <p style="font-family:'Cormorant Garamond',serif; font-size:13px; color:#8b5a66; font-style:italic;">Always radiant</p>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══════════ QUOTE SECTION ══════════ -->
+<section class="content px-8 py-12 max-w-md mx-auto">
+  <div class="fade-up quote-block">
+    <p style="font-family:'Cormorant Garamond',serif; font-size:1.25rem; font-weight:300; line-height:1.8; color:#6b3040;">
+      "Gratitude is one of those things that's hard to say without it sounding small. 
+      So I'll just say this — thank you for being you, exactly as you are."
+    </p>
+  </div>
+</section>
+
+<!-- ══════════ SURPRISE SECTION ══════════ -->
+<section class="content px-6 py-16 max-w-md mx-auto text-center" id="surpriseSection">
+
+  <div class="fade-up">
+    <p style="font-size:11px; letter-spacing:0.28em; color:var(--gold); text-transform:uppercase; margin-bottom:18px;">The birthday wish</p>
+    <h2 style="font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:400; color:var(--deep); margin-bottom:12px;">
+      Happy Birthday, Grace 🎂
+    </h2>
+    <p style="font-size:15px; color:#7a4050; line-height:1.8; font-weight:300; margin-bottom:36px;">
+      Today is yours. Every bit of it.
+    </p>
+
+    <button class="surprise-btn" id="surpriseBtn" onclick="revealSurprise()">
+      ✨ Open Your Surprise
+    </button>
+  </div>
+
+  <!-- Hidden romantic message -->
+  <div id="romantic-msg" class="mt-10">
+    <div style="background:white; border-radius:24px; padding:32px 28px; box-shadow:0 8px 40px rgba(139,58,82,0.12); border:1px solid rgba(232,160,176,0.3);">
+
+      <div style="font-size:28px; margin-bottom:16px;">💌</div>
+
+      <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:var(--deep); margin-bottom:16px; font-weight:400;">
+        To Grace, with all sincerity
+      </h3>
+
+      <div class="gold-line" style="margin-bottom:24px;"></div>
+
+      <p style="font-size:15px; line-height:1.9; color:#5a3040; font-weight:300; margin-bottom:20px;">
+        I don't think you always see yourself the way others do — the quiet strength you carry, 
+        the kindness that comes so naturally to you. But I see it. 
+        Every conversation, every small moment — they matter more than you know.
+      </p>
+
+      <p style="font-size:15px; line-height:1.9; color:#5a3040; font-weight:300; margin-bottom:20px;">
+        On this birthday, I hope you feel celebrated — truly celebrated — 
+        not just for what you do, but for who you are when no one's watching.
+      </p>
+
+      <p style="font-family:'Cormorant Garamond',serif; font-size:1.2rem; font-style:italic; color:var(--deep); margin-top:8px;">
+        Wishing you a year that feels like you deserve — beautiful, full, and yours.
+      </p>
+
+      <div style="margin-top:28px; padding-top:20px; border-top:1px solid rgba(232,160,176,0.3);">
+        <p style="font-size:12px; letter-spacing:0.14em; color:var(--rose); text-transform:uppercase;">With love</p>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="content text-center py-12 px-6">
+  <div style="font-size:22px; letter-spacing:6px; margin-bottom:12px; opacity:0.6;">🌸 ✦ 🌹</div>
+  <p style="font-family:'Cormorant Garamond',serif; font-size:13px; letter-spacing:0.18em; color:var(--rose); text-transform:uppercase; opacity:0.75;">
+    Made with love · Grace's Day
+  </p>
+</footer>
+
+<!-- Easter egg -->
+<div id="easter-egg" title="You found the easter egg 🥚">// made.with(love) FROM AIME</div>
+
+<!-- ══════════ SCRIPTS ══════════ -->
+<script>
+  /* ── Cursor glow (desktop only) ── */
+  const glow = document.getElementById('cursorGlow');
+  if (window.innerWidth > 768) {
+    document.addEventListener('mousemove', e => {
+      glow.style.left = e.clientX + 'px';
+      glow.style.top  = e.clientY + 'px';
+    });
+  } else {
+    glow.style.display = 'none';
+  }
+
+  /* ── Entrance observer ── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.fade-up, .fade-in').forEach(el => observer.observe(el));
+
+  /* ── Typing animation ── */
+  const msg = "Happy Birthday. Today, of all days, I want you to know how genuinely glad I am that you exist.";
+  const el  = document.getElementById('typingText');
+  let i = 0;
+
+  function type() {
+    if (i < msg.length) {
+      el.textContent += msg[i++];
+      setTimeout(type, i < 14 ? 55 : 32);
+    } else {
+      el.classList.remove('typing-cursor');
+      // Fade in scroll hint
+      document.getElementById('scrollHint').classList.add('visible');
+    }
+  }
+
+  setTimeout(type, 900);
+
+  /* ── Floating hearts ── */
+  const canvas = document.getElementById('hearts-canvas');
+  const ctx    = canvas.getContext('2d');
+  let hearts   = [];
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function spawnHeart() {
+    hearts.push({
+      x:     Math.random() * canvas.width,
+      y:     canvas.height + 20,
+      size:  Math.random() * 12 + 6,
+      speed: Math.random() * 0.6 + 0.3,
+      drift: (Math.random() - 0.5) * 0.4,
+      alpha: Math.random() * 0.18 + 0.06,
+      rot:   Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.02,
+      char:  Math.random() > 0.5 ? '♥' : '✿'
+    });
+  }
+
+  function drawHearts() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hearts.forEach((h, idx) => {
+      ctx.save();
+      ctx.globalAlpha = h.alpha;
+      ctx.font = `${h.size}px Georgia`;
+      ctx.fillStyle = `hsl(${340 + Math.random() * 20}, 65%, 70%)`;
+      ctx.translate(h.x, h.y);
+      ctx.rotate(h.rot);
+      ctx.fillText(h.char, 0, 0);
+      ctx.restore();
+      h.y    -= h.speed;
+      h.x    += h.drift;
+      h.rot  += h.rotSpeed;
+      if (h.y < -30) hearts.splice(idx, 1);
+    });
+    requestAnimationFrame(drawHearts);
+  }
+
+  setInterval(spawnHeart, 900);
+  drawHearts();
+
+  /* ── Music control ── */
+  const audio     = document.getElementById('bgMusic');
+  const musicBtn  = document.getElementById('musicBtn');
+  const musicBars = document.getElementById('musicBars');
+  const musicLabel= document.getElementById('musicLabel');
+  let musicOn = false;
+  let interacted = false;
+
+  audio.volume = 0.25;
+
+  function toggleMusic() {
+    if (!musicOn) {
+      audio.play().catch(() => {});
+      musicBars.classList.remove('paused');
+      musicLabel.textContent = 'Music on';
+      musicOn = true;
+    } else {
+      audio.pause();
+      musicBars.classList.add('paused');
+      musicLabel.textContent = 'Turn on music';
+      musicOn = false;
+    }
+  }
+
+  // Auto-attempt on any interaction
+  document.addEventListener('click', () => {
+    if (!interacted && !musicOn) { interacted = true; }
+  }, { once: true });
+
+  /* ── Surprise reveal + confetti ── */
+  let revealed = false;
+  function revealSurprise() {
+    if (revealed) return;
+    revealed = true;
+
+    const btn = document.getElementById('surpriseBtn');
+    btn.textContent = '🌸 With all my heart';
+    btn.style.background = 'linear-gradient(135deg, #c9a96e 0%, #8b6a3a 100%)';
+    btn.disabled = true;
+
+    // Show message
+    const msg = document.getElementById('romantic-msg');
+    msg.classList.add('show');
+
+    // Scroll to it
+    setTimeout(() => msg.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+
+    // Start music if not on
+    if (!musicOn) { toggleMusic(); }
+
+    // Confetti burst
+    setTimeout(() => launchConfetti(), 400);
+  }
+
+  function launchConfetti() {
+    const colors = ['#e8a0b0','#f7d6e0','#c9a96e','#8b3a52','#ffd6e0','#fff0f5'];
+    const base = { particleCount: 8, spread: 55, colors, disableForReducedMotion: true };
+
+    confetti({ ...base, origin: { x: 0.2, y: 0.55 }, angle: 60,  startVelocity: 35 });
+    confetti({ ...base, origin: { x: 0.8, y: 0.55 }, angle: 120, startVelocity: 35 });
+
+    setTimeout(() => {
+      confetti({ ...base, particleCount: 14, origin: { x: 0.5, y: 0.45 }, angle: 90, startVelocity: 50, spread: 80 });
+    }, 300);
+    setTimeout(() => {
+      confetti({ ...base, particleCount: 6, origin: { x: 0.3, y: 0.6 }, angle: 75,  startVelocity: 30 });
+      confetti({ ...base, particleCount: 6, origin: { x: 0.7, y: 0.6 }, angle: 105, startVelocity: 30 });
+    }, 650);
+  }
+
+  /* ── Easter egg console ── */
+  console.log('%c🌸 Happy Birthday, Grace!', 'color:#e8a0b0; font-size:20px; font-family:Georgia;');
+  console.log('%c// You found the console easter egg. Built with love.', 'color:#8b3a52; font-size:12px;');
+
+  /* ── Easter egg click ── */
+  document.getElementById('easter-egg').addEventListener('click', () => {
+    launchConfetti();
+  });
+</script>
+</body>
+</html>
