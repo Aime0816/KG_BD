@@ -7,6 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
 
 <style>
   :root {
@@ -464,7 +465,7 @@
       </p>
 
       <div style="margin-top:28px; padding-top:20px; border-top:1px solid rgba(232,160,176,0.3);">
-        <p style="font-size:12px; letter-spacing:0.14em; color:var(--rose); text-transform:uppercase;">With love</p>
+        <p style="font-size:12px; letter-spacing:0.14em; color:var(--rose); text-transform:uppercase;">With love, From AIME</p>
       </div>
     </div>
   </div>
@@ -586,12 +587,12 @@
     if (!musicOn) {
       audio.play().catch(() => {});
       musicBars.classList.remove('paused');
-      musicLabel.textContent = 'Music on';
+      musicLabel.textContent = 'HBD, Grace!';
       musicOn = true;
     } else {
       audio.pause();
       musicBars.classList.add('paused');
-      musicLabel.textContent = 'Turn on music';
+      musicLabel.textContent = 'Everything for you';
       musicOn = false;
     }
   }
